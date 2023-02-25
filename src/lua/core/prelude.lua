@@ -16,37 +16,26 @@ end
 
 N.manager = {}
 
-N.manager.path = N.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
+N.manager.path = N.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 
-N.manager.repo = 'https://github.com/wbthomason/packer.nvim'
-
-N.manager.boot = nil
+N.manager.link = 'https://github.com/folke/lazy.nvim.git'
 
 N.manager.download = function()
-    if N.fn.empty(N.fn.glob(N.manager.path)) > 0 then
-        N.manager.boot = N.fn.system {
+    if not N.loop.fs_stat(N.manager.path) then
+        N.fn.system {
             'git',
             'clone',
-            '--depth',
-            '1',
-            N.manager.repo,
+            '--filter=blob:none',
+            N.manager.link,
+            '--branch=stable',
             N.manager.path,
         }
     end
+    N.opt.rtp:prepend(N.manager.path)
 end
 
 N.manager.config = {
-    display = {
-        open_fn = function()
-            return require('packer.util').float {
-                border = 'none',
-            }
-        end,
-    },
-    profile = {
-        enable = true,
-        threshold = 0,
-    },
+    -- lockfile = N.fn.stdpath 'data' .. "/lazy-lock.json",
 }
 
 N.plugin = {}
@@ -60,82 +49,79 @@ N.plugin.load = function(n)
     return m
 end
 
-N.plugin.list = {}
-
-N.plugin.list.packer = { 'wbthomason/packer.nvim' } -- packer
-
--- theme.lua
-N.plugin.list.rose_pine = { 'rose-pine/nvim' } -- colorscheme
-N.plugin.list.hardline = { 'ojroques/nvim-hardline' } -- status & buffer lines
-N.plugin.list.cursorline = { 'yamatsum/nvim-cursorline' } -- cursorline
-
--- treesitter.lua
-N.plugin.list.treesitter = {
-    'nvim-treesitter/nvim-treesitter', -- treesitter
-    requires = {
-        { 'nvim-lua/plenary.nvim' },
+-- plugins
+N.plugin.list = {
+    { 'rose-pine/nvim' },
+    { 'ojroques/nvim-hardline' },
+    { 'yamatsum/nvim-cursorline' },
+    {
+        'nvim-treesitter/nvim-treesitter',
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+        },
     },
-    as = 'treesitter',
-}
-N.plugin.list.name = {
-    'p00f/nvim-ts-rainbow', -- treesitter ext (rainbow parens)
-    after = { 'treesitter' },
-}
-N.plugin.list.name = {
-    'nvim-treesitter/nvim-treesitter-context', -- treesitter ext (context)
-    after = { 'treesitter' },
-}
-N.plugin.list.indent = { 'lukas-reineke/indent-blankline.nvim' } -- indent
-N.plugin.list.comment = { 'numtostr/comment.nvim' } -- comment
-N.plugin.list.surround = { 'kylechui/nvim-surround' } -- surround
-
--- telescope.lua
-N.plugin.list.telescope = {
-    'nvim-telescope/telescope.nvim', -- telescope
-    requires = {
-        { 'nvim-lua/plenary.nvim' },
+    {
+        'nvim-treesitter/nvim-treesitter-context',
+        dependencies = {
+            'nvim-treesitter/nvim-treesitter',
+        },
     },
-    as = 'telescope',
-}
-N.plugin.list.telescope_fzy_native = {
-    'nvim-telescope/telescope-fzy-native.nvim', -- telescope ext (fzy sorter)
-    after = { 'telescope' },
-}
-
--- git.lua
-N.plugin.list.gitsigns = { 'lewis6991/gitsigns.nvim' } -- git signs
-N.plugin.list.neogit = { 'timuntersberger/neogit' } -- git console
-
--- lsp.lua
-N.plugin.list.lsp_zero = {
-    'vonheikemen/lsp-zero.nvim', -- lsp config
-    requires = {
-        { 'neovim/nvim-lspconfig' }, -- lsp support
-        { 'williamboman/mason.nvim' }, -- lsp installer
-        { 'williamboman/mason-lspconfig.nvim' }, -- lsp installer binds
-        { 'hrsh7th/nvim-cmp' }, -- autocompletion
-        { 'hrsh7th/cmp-buffer' }, -- completions srcs (buffer)
-        { 'hrsh7th/cmp-path' }, -- completions srcs (path)
-        { 'saadparwaiz1/cmp_luasnip' }, -- completions srcs (luasnip)
-        { 'hrsh7th/cmp-nvim-lsp' }, -- completions srcs (lsp)
-        { 'hrsh7th/cmp-nvim-lua' }, -- completions srcs (lua)
-        { 'l3mon4d3/luasnip' }, -- snippets engine
-        { 'rafamadriz/friendly-snippets' }, -- snippets lib
+    {
+        'mrjones2014/nvim-ts-rainbow',
+        dependencies = {
+            'nvim-treesitter/nvim-treesitter',
+        },
+    },
+    { 'lukas-reineke/indent-blankline.nvim' },
+    { 'numtostr/comment.nvim' },
+    { 'kylechui/nvim-surround' },
+    {
+        'nvim-telescope/telescope.nvim',
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+        },
+    },
+    {
+        'nvim-telescope/telescope-fzy-native.nvim',
+        dependencies = {
+            'nvim-telescope/telescope.nvim',
+        },
+    },
+    { 'lewis6991/gitsigns.nvim' },
+    { 'timuntersberger/neogit' },
+    {
+        'vonheikemen/lsp-zero.nvim',
+        dependencies = {
+            { 'neovim/nvim-lspconfig' },
+            { 'williamboman/mason.nvim' },
+            { 'williamboman/mason-lspconfig.nvim' },
+            { 'hrsh7th/nvim-cmp' },
+            { 'hrsh7th/cmp-buffer' },
+            { 'hrsh7th/cmp-path' },
+            { 'saadparwaiz1/cmp_luasnip' },
+            { 'hrsh7th/cmp-nvim-lsp' },
+            { 'hrsh7th/cmp-nvim-lua' },
+            { 'l3mon4d3/luasnip' },
+            { 'rafamadriz/friendly-snippets' },
+        },
+    },
+    { 'mortepau/codicons.nvim' },
+    { 'onsails/lspkind.nvim' },
+    { 'smjonas/inc-rename.nvim' },
+    { 'windwp/nvim-autopairs' },
+    { 'kosayoda/nvim-lightbulb' },
+    { 'ray-x/lsp_signature.nvim' },
+    { 'kyazdani42/nvim-web-devicons' },
+    { 'folke/which-key.nvim' },
+    { 'folke/trouble.nvim' },
+    { 'kyazdani42/nvim-tree.lua' },
+    {
+        'folke/noice.nvim',
+        dependencies = {
+            'muniftanjim/nui.nvim',
+        },
     },
 }
-N.plugin.list.codicons = { 'mortepau/codicons.nvim' } -- pictograms (icons)
-N.plugin.list.lspkind = { 'onsails/lspkind.nvim' } -- completion pictograms
-N.plugin.list.inc_rename = { 'smjonas/inc-rename.nvim' } -- inc-rename
-N.plugin.list.autopairs = { 'windwp/nvim-autopairs' } -- autopairs
-N.plugin.list.lightbulb = { 'kosayoda/nvim-lightbulb' } -- code-action-bulb
-N.plugin.list.signature = { 'ray-x/lsp_signature.nvim' } -- signature
-
--- ui.lua
-N.plugin.list.devicons = { 'kyazdani42/nvim-web-devicons' }
-N.plugin.list.which = { 'folke/which-key.nvim' } -- which key
-N.plugin.list.trouble = { 'folke/trouble.nvim' } -- qfix/loc lists
-N.plugin.list.tree = { 'kyazdani42/nvim-tree.lua' } -- file exporer
-N.plugin.list.noice = { 'folke/noice.nvim', requires = { { 'muniftanjim/nui.nvim' } } } -- enhanced ui
 
 -- treesitter parsers
 N.plugin.treesitter = {}

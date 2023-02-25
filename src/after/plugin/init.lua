@@ -1,6 +1,0 @@
-require 'plug.theme'
-require 'plug.treesitter'
-require 'plug.telescope'
-require 'plug.git'
-require 'plug.ui'
-require 'plug.lsp'
