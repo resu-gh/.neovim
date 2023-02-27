@@ -1,5 +1,9 @@
 N = vim
 
+N.autocmd = N.api.nvim_create_autocmd
+N.augroup = N.api.nvim_create_augroup
+N._augroup = function(n) return N.augroup('neovim_' .. n, { clear = true }) end
+
 N.builtin = {}
 N.builtin.disable = function(b) N.g['loaded' .. b] = 1 end
 
